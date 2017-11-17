@@ -1,0 +1,56 @@
+nuget {
+   nuspec {
+      id = xerces-c-static;
+      version : 3.2.0;
+      title : xerces-c;
+      authors : Apache Software Foundation;
+      owners : ksmyth;
+
+      licenseUrl : "http://www.apache.org/licenses/LICENSE-2.0";
+      projectUrl: "http://xerces.apache.org/xerces-c/";
+      iconUrl: "http://xerces.apache.org/images/apache-xerces.png";
+      requireLicenseAcceptance:false;
+      summary: Xerces-C XML library, linked against static C runtime;
+
+      description: @"Xerces-C++ makes it easy to give your application the
+      ability to read and write XML data. A shared library is provided for
+      parsing, generating, manipulating, and validating XML documents using
+      the DOM, SAX, and SAX2 APIs.
+
+      Xerces-C++ is faithful to the XML 1.0 recommendation and many associated
+      standards.
+
+      The parser provides high performance, modularity, and scalability.
+      Source code, samples and API documentation are provided with the parser.
+      For portability, care has been taken to make minimal use of templates, no RTTI, and minimal use of #ifdefs";
+      releaseNotes: "Dynamic libraries linked against static C runtime";
+      copyright: Copyright 2014;
+      tags: { native, nativepackage, cpp };
+   }
+
+   files {
+        nestedInclude : {
+           #destination = ${d_include}\xercesc;
+           "src\xercesc\**\*.hpp",
+           "src\xercesc\**\*.c",
+        };
+
+        #overlay : false;
+        vcpdb += {
+            // #flatten = true;
+            #destination = ${d_lib};
+        };
+
+        [x64] {
+            lib += x64\src\RelWithDebInfo\xerces-c_3.lib;
+            bin += x64\src\RelWithDebInfo\xerces-c_3_2.dll;
+            vcpdb += x64\src\RelWithDebInfo\xerces-c_3_2.pdb;
+        }
+
+        [win32] {
+            lib += src\RelWithDebInfo\xerces-c_3.lib;
+            bin += src\RelWithDebInfo\xerces-c_3_2.dll;
+            vcpdb += src\RelWithDebInfo\xerces-c_3_2.pdb;
+        }
+    }
+}
