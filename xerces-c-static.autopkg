@@ -10,7 +10,7 @@ nuget {
       projectUrl: "http://xerces.apache.org/xerces-c/";
       iconUrl: "http://xerces.apache.org/images/apache-xerces.png";
       requireLicenseAcceptance:false;
-      summary: Xerces-C XML library, linked against static C runtime;
+      summary: "Xerces-C XML library, linked against static C runtime";
 
       description: @"Xerces-C++ makes it easy to give your application the
       ability to read and write XML data. A shared library is provided for
