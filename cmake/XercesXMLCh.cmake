@@ -49,8 +49,14 @@ if(HAVE_STD_char16_t)
     endif()
   endif()
 
-  set(XERCES_XMLCH_T char16_t)
-  set(XERCES_USE_CHAR16_T 1)
+
+  if(WIN32)
+    set(XERCES_XMLCH_T wchar_t)
+    set(XERCES_INCLUDE_WCHAR_H 1)
+  else()
+   set(XERCES_XMLCH_T char16_t)
+   set(XERCES_USE_CHAR16_T 1)
+  endif()
 else()
   if(WIN32)
     check_cxx_source_compiles("
