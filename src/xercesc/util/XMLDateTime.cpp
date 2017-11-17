@@ -580,7 +580,11 @@ time_t XMLDateTime::getEpoch(bool duration) const
         return mktime(&t) - _timezone;
 #else
         // Hopefully most others...?
-        return mktime(&t) - timezone;
+#if _MSC_VER >= 1900
+		long timezone = 0;
+		_get_timezone(&timezone);
+#endif
+		return mktime(&t) - timezone;
 #endif
     }
 }
