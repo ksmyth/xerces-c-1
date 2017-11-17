@@ -45,8 +45,17 @@ if(HAVE_STD_char16_t)
   endif()
 endif()
 
-if(WIN32)
-  check_cxx_source_compiles("
+
+  if(WIN32)
+    set(XERCES_XMLCH_T wchar_t)
+    set(XERCES_INCLUDE_WCHAR_H 1)
+  else()
+   set(XERCES_XMLCH_T char16_t)
+   set(XERCES_USE_CHAR16_T 1)
+  endif()
+else()
+  if(WIN32)
+    check_cxx_source_compiles("
 #include <windows.h>
 
 wchar_t file[] = L\"dummy.file\";
