@@ -1,0 +1,31 @@
+install:
+  - ps: (new-object net.webclient).DownloadFile('https://nuget-packages.metamorphsoftware.com/CoApp.Tools.Powershell.msi', 'C:\CoApp.Tools.Powershell.msi')
+  - ps: Start-Process -FilePath msiexec -ArgumentList /i, 'C:\CoApp.Tools.Powershell.msi', /quiet -Wait
+  - ps: $env:PSModulePath = $env:PSModulePath + ';C:\Program Files (x86)\Outercurve Foundation\Modules'
+  - ps: Import-Module CoApp
+
+build_script:
+  - set x86_x64=x64
+  - 'cmd /s /c ""c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" %x86_x64% & set PATH=%PATH%;C:\Program Files (x86)\Windows Kits\10\bin\10.0.15063.0\%x86_x64% & cmake -G "Visual Studio 14 2015 Win64""'
+  - msbuild xerces-c.sln /m /p:configuration=Debug
+  - msbuild xerces-c.sln /m /p:configuration=RelWithDebInfo /t:Library\xerces-c
+  - 'ctest -V -C Debug --exclude-regex .*ThreadTest.*'
+  - '"c:\Program Files\7-Zip\7z.exe"  a xerces-x64.zip  src\RelWithDebInfo\xerces-c_3.lib src\RelWithDebInfo\xerces-c_3_2.dll src\RelWithDebInfo\xerces-c_3_2.pdb'
+
+  - git clean -xdf -e xerces-x64.zip
+  - git checkout HEAD -- .
+
+  - set x86_x64=x86
+  - 'cmd /s /c ""c:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" %x86_x64% & set PATH=%PATH%;C:\Program Files (x86)\Windows Kits\10\bin\10.0.15063.0\%x86_x64% & cmake -G "Visual Studio 14 2015""'
+  - msbuild xerces-c.sln /m /p:configuration=Debug;Platform=Win32
+  - msbuild xerces-c.sln /m /p:configuration=RelWithDebInfo;Platform=Win32 /t:Library\xerces-c
+  # - 'ctest -V -C Debug --exclude-regex .*ThreadTest.*'
+
+  - '"c:\Program Files\7-Zip\7z.exe"  x -ox64 xerces-x64.zip'
+
+  - ps: 'Import-Module CoApp; Write-NuGetPackage .\xerces-c-static.autopkg'
+
+artifacts:
+  - path: '*.nupkg'
+  - path: '**\*.dll'
+  - path: 'src\*\xerces-*.pdb'
