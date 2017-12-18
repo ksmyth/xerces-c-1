@@ -43,14 +43,14 @@ nuget {
 
         [x64] {
             lib += x64\src\RelWithDebInfo\xerces-c_3.lib;
-            bin += x64\src\RelWithDebInfo\xerces-c_3_2.dll;
-            vcpdb += x64\src\RelWithDebInfo\xerces-c_3_2.pdb;
+            bin += x64\src\RelWithDebInfo\xerces-c_3_2x64.dll;
+            vcpdb += x64\src\RelWithDebInfo\xerces-c_3_2x64.pdb;
         }
 
         [win32] {
             lib += src\RelWithDebInfo\xerces-c_3.lib;
-            bin += src\RelWithDebInfo\xerces-c_3_2.dll;
-            vcpdb += src\RelWithDebInfo\xerces-c_3_2.pdb;
+            bin += src\RelWithDebInfo\xerces-c_3_2Win32.dll;
+            vcpdb += src\RelWithDebInfo\xerces-c_3_2Win32.pdb;
         }
     }
 }

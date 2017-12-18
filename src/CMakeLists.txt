@@ -1282,7 +1282,7 @@ if(MSVC)
   # Different naming for Windows than for Unix builds for backward
   # compatibility with the existing project files.
   set_target_properties(xerces-c PROPERTIES OUTPUT_NAME "xerces-c_${INTERFACE_VERSION_MAJOR}")
-  set_target_properties(xerces-c PROPERTIES RUNTIME_OUTPUT_NAME "xerces-c_${INTERFACE_VERSION_U}")
+  set_target_properties(xerces-c PROPERTIES RUNTIME_OUTPUT_NAME "xerces-c_${INTERFACE_VERSION_U}$(Platform)")
   set_target_properties(xerces-c PROPERTIES DEBUG_POSTFIX "D")
 elseif(UNIX)
   # For strict libtool compatibility on Unix.  It's a horrible hack to

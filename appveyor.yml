@@ -10,7 +10,7 @@ build_script:
   - msbuild xerces-c.sln /m /p:configuration=Debug
   - msbuild xerces-c.sln /m /p:configuration=RelWithDebInfo /t:Library\xerces-c
   - 'ctest -V -C Debug --exclude-regex .*ThreadTest.*'
-  - '"c:\Program Files\7-Zip\7z.exe"  a xerces-x64.zip  src\RelWithDebInfo\xerces-c_3.lib src\RelWithDebInfo\xerces-c_3_2.dll src\RelWithDebInfo\xerces-c_3_2.pdb'
+  - '"c:\Program Files\7-Zip\7z.exe"  a xerces-x64.zip  src\RelWithDebInfo\xerces-c_3.lib src\RelWithDebInfo\xerces-c_3_2x64.dll src\RelWithDebInfo\xerces-c_3_2x64.pdb'
 
   - git clean -xdf -e xerces-x64.zip
   - git checkout HEAD -- .
@@ -29,3 +29,4 @@ artifacts:
   - path: '*.nupkg'
   - path: '**\*.dll'
   - path: 'src\*\xerces-*.pdb'
+  - path: 'x64\src\*\xerces-*.pdb'
