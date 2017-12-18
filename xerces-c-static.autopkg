@@ -1,7 +1,7 @@
 nuget {
    nuspec {
       id = xerces-c-static;
-      version : 3.2.0;
+      version : 3.2.0.2;
       title : xerces-c;
       authors : Apache Software Foundation;
       owners : ksmyth;
