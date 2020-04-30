@@ -41,37 +41,13 @@ if(HAVE_STD_char16_t)
   elseif(WIN32 AND NOT SIZEOF_WCHAR_T EQUAL 2)
     message(WARNING "wchar_t is not a 16-bit type, and size differs from char16_t")
   else()
-    list(APPEND xmlch_types char16_t)
   endif()
 endif()
 
 
-  if(WIN32)
-    set(XERCES_XMLCH_T wchar_t)
-    set(XERCES_INCLUDE_WCHAR_H 1)
-  else()
-   set(XERCES_XMLCH_T char16_t)
-   set(XERCES_USE_CHAR16_T 1)
-  endif()
-else()
-  if(WIN32)
-    check_cxx_source_compiles("
-#include <windows.h>
-
-wchar_t file[] = L\"dummy.file\";
-
-int main() {
-  DeleteFileW(file);
-  return 0;
-}"
-      WINDOWS_wchar)
-
-  if(WINDOWS_wchar)
-    list(APPEND xmlch_types wchar_t)
-  endif()
-endif()
-
-list(APPEND xmlch_types uint16_t)
+set(XERCES_XMLCH_T wchar_t)
+set(XERCES_INCLUDE_WCHAR_H 1)
+list(APPEND xmlch_types wchar_t)
 
 string(REPLACE ";" "|" xmlch_type_help "${xmlch_types}")
 list(GET xmlch_types 0 xerces_xmlch_type_default)
@@ -83,13 +59,5 @@ if(xmlch_type_found EQUAL -1)
   message(FATAL_ERROR "${xmlch_type} xmlch_type unavailable")
 endif()
 
-set(XERCES_XMLCH_T ${XERCES_U16BIT_INT})
-set(XERCES_USE_CHAR16_T 0)
-set(XERCES_INCLUDE_WCHAR_H 0)
-if(xmlch_type STREQUAL "char16_t")
-  set(XERCES_XMLCH_T char16_t)
-  set(XERCES_USE_CHAR16_T 1)
-elseif(xmlch_type STREQUAL "wchar_t")
 set(XERCES_XMLCH_T wchar_t)
 set(XERCES_INCLUDE_WCHAR_H 1)
-endif()
