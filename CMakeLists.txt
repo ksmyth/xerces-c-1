@@ -19,7 +19,7 @@
 
 # Run "cmake" to generate the build files for your platform
 
-cmake_minimum_required(VERSION 3.2.0)
+cmake_minimum_required(VERSION 3.15.0)
 
 # Use new variable expansion policy.
 if (POLICY CMP0053)
@@ -31,6 +31,7 @@ endif(POLICY CMP0054)
 if (POLICY CMP0067)
   cmake_policy(SET CMP0067 NEW)
 endif(POLICY CMP0067)
+  cmake_policy(SET CMP0091 NEW)
 
 # Try C++14, then fall back to C++11 and C++98.  Used for feature tests
 # for optional features.
@@ -69,11 +70,13 @@ message(STATUS "Configuring Apache Xerces-C++ version ${xerces_c_version}")
 project(xerces-c
         VERSION "${xerces_c_version}"
         LANGUAGES C CXX)
-enable_testing()
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 
+set( CMAKE_MSVC_RUNTIME_LIBRARY  "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+enable_testing()
 # For autotools header compatibility
 set(PACKAGE "${PROJECT_NAME}")
 set(PACKAGE_NAME "${PROJECT_NAME}")
@@ -203,3 +206,9 @@ message(STATUS "  Transcoder:                ${transcoder}")
 message(STATUS "  NetAccessor:               ${netaccessor}")
 message(STATUS "  Message Loader:            ${msgloader}")
 message(STATUS "  XMLCh type:                ${xmlch_type}")
+
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+
+set(MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
