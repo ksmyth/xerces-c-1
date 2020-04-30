@@ -32,6 +32,7 @@ endif()
 
 set(XERCES_PLATFORM_EXPORT)
 set(XERCES_PLATFORM_IMPORT)
+set(XERCES_TEMPLATE_EXTERN extern)
 set(XERCES_DLL_EXPORT)
 set(XERCES_STATIC_LIBRARY)
 if(NOT BUILD_SHARED_LIBS)
@@ -40,24 +41,9 @@ else()
   if(WIN32)
     set(XERCES_PLATFORM_EXPORT "__declspec(dllexport)")
     set(XERCES_PLATFORM_IMPORT "__declspec(dllimport)")
+    if (MSVC)
+      set(XERCES_TEMPLATE_EXTERN)
+    endif()
     set(XERCES_DLL_EXPORT 1)
   endif()
 endif()
-
-# Versioning information
-
-file(STRINGS "${PROJECT_SOURCE_DIR}/version.incl" icu_verinfo
-  REGEX "^[^#].*=.*")
-
-foreach(item IN LISTS icu_verinfo)
-  string(REGEX REPLACE "^([^=]+)=(.*)"
-    "\\1" lib_key "${item}")
-  string(REGEX REPLACE "^([^=]+)=(.*)"
-    "\\2" lib_value "${item}")
-  set(LIB_${lib_key} "${lib_value}")
-endforeach()
-
-string(REGEX REPLACE "^([0-9]+)_.*"
-  "\\1"
-  LIB_INTERFACE_VER_U_MAJOR
-  "${LIB_INTERFACE_VER_U}")

@@ -48,6 +48,7 @@
 // ---------------------------------------------------------------------------
 //  These defines are set by configure as appropriate for the platform.
 // ---------------------------------------------------------------------------
+
 #undef XERCES_AUTOCONF
 #undef XERCES_HAVE_CSTDINT
 #undef XERCES_HAVE_STDINT_H
@@ -79,6 +80,7 @@
 
 #undef XERCES_PLATFORM_EXPORT
 #undef XERCES_PLATFORM_IMPORT
+#undef XERCES_TEMPLATE_EXTERN
 
 #undef XERCES_NO_MATCHING_DELETE_OPERATOR
 

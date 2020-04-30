@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -135,56 +135,40 @@ int _wcsicmp(LPCWSTR comp1, LPCWSTR comp2)
 
 static inline void xmlch_wcsupr(XMLCh* str)
 {
-#ifdef XERCES_USE_CHAR16_T
     _wcsupr(reinterpret_cast<LPWSTR>(str));
-#else
-    _wcsupr(str);
-#endif
 }
 
 static inline int xmlch_wcsicmp(const XMLCh* comp1, const XMLCh* comp2)
 {
-#ifdef XERCES_USE_CHAR16_T
     return _wcsicmp(reinterpret_cast<LPCWSTR>(comp1), reinterpret_cast<LPCWSTR>(comp2));
-#else
-    return _wcsicmp(comp1, comp2);
-#endif
 }
 
 static inline int xmlch_wcsnicmp(const XMLCh* comp1, const XMLCh* comp2, const XMLSize_t maxChars)
 {
-#ifdef XERCES_USE_CHAR16_T
     return _wcsnicmp(reinterpret_cast<LPCWSTR>(comp1), reinterpret_cast<LPCWSTR>(comp2), maxChars);
-#else
-    return _wcsnicmp(comp1, comp2, maxChars);
-#endif
 }
 
 static inline void xmlch_wcslwr(XMLCh* str)
 {
-#ifdef XERCES_USE_CHAR16_T
     _wcslwr(reinterpret_cast<LPWSTR>(str));
-#else
-    _wcslwr(str);
-#endif
 }
 
 
-// it's a local function (instead of a static function) so that we are not 
+// it's a local function (instead of a static function) so that we are not
 // forced to include <windows.h> in the header
 bool isAlias(const   HKEY            encodingKey
              ,       char* const     aliasBuf = 0
              , const unsigned int    nameBufSz = 0)
 {
-    unsigned long theType;
-    unsigned long theSize = nameBufSz;
+    DWORD theType;
+    DWORD theSize = nameBufSz;
     return (::RegQueryValueExA
     (
         encodingKey
         , "AliasForCharset"
         , 0
         , &theType
-        , (unsigned char*)aliasBuf
+        , (LPBYTE)aliasBuf
         , &theSize
     ) == ERROR_SUCCESS);
 }
@@ -338,7 +322,7 @@ Win32TransService::Win32TransService(MemoryManager* manager) :
     ::GetVersionEx(&OSVer);
 
     if ((OSVer.dwPlatformId == VER_PLATFORM_WIN32_NT) &&
-        ((OSVer.dwMajorVersion == 5) && (OSVer.dwMinorVersion > 0)))
+        (OSVer.dwMajorVersion > 5 || (OSVer.dwMajorVersion == 5 && OSVer.dwMinorVersion > 0)))
     {
         onXPOrLater = true;
     }
@@ -374,8 +358,8 @@ Win32TransService::Win32TransService(MemoryManager* manager) :
     //
     const unsigned int nameBufSz = 1024;
     char nameBuf[nameBufSz + 1];
-    unsigned int subIndex;
-    unsigned long theSize;
+    DWORD subIndex;
+    DWORD theSize;
     for (subIndex = 0;;++subIndex)
     {
         // Get the name of the next key
@@ -405,7 +389,7 @@ Win32TransService::Win32TransService(MemoryManager* manager) :
         }
 
         //
-        //  Lts see if its an alias. If so, then ignore it in this first
+        //  Let's see if its an alias. If so, then ignore it in this first
         //  loop. Else, we'll add a new entry for this one.
         //
         if (!isAlias(encodingKey))
@@ -418,7 +402,7 @@ Win32TransService::Win32TransService(MemoryManager* manager) :
             //  The Codepage entry is the default code page for a computer using that charset
             //  while the InternetEncoding holds the code page that represents that charset
             //
-            unsigned long theType;
+            DWORD theType;
             unsigned int CPId;
             unsigned int IEId;
 
@@ -429,7 +413,7 @@ Win32TransService::Win32TransService(MemoryManager* manager) :
                 , "Codepage"
                 , 0
                 , &theType
-                , (unsigned char*)&CPId
+                , (LPBYTE)&CPId
                 , &theSize) != ERROR_SUCCESS)
             {
                 ::RegCloseKey(encodingKey);
@@ -449,7 +433,7 @@ Win32TransService::Win32TransService(MemoryManager* manager) :
                     , "InternetEncoding"
                     , 0
                     , &theType
-                    , (unsigned char*)&IEId
+                    , (LPBYTE)&IEId
                     , &theSize) != ERROR_SUCCESS)
                 {
                     ::RegCloseKey(encodingKey);
@@ -501,7 +485,7 @@ Win32TransService::Win32TransService(MemoryManager* manager) :
         }
 
         //
-        //  If its an alias, look up the name in the map. If we find it,
+        //  If it's an alias, look up the name in the map. If we find it,
         //  then construct a new one with the new name and the aliased
         //  ids.
         //

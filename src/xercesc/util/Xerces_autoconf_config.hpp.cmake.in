@@ -72,6 +72,7 @@
 #cmakedefine XERCES_NEW_IOSTREAMS 1
 #cmakedefine XERCES_NO_NATIVE_BOOL 1
 #cmakedefine XERCES_LSTRSUPPORT 1
+#cmakedefine XERCES_MFC_SUPPORT 1
 
 #cmakedefine XERCES_HAVE_CPUID_INTRINSIC 1
 #cmakedefine XERCES_HAVE_SSE2_INTRINSIC 1
@@ -83,6 +84,7 @@
 #cmakedefine XERCES_STATIC_LIBRARY 1
 #define XERCES_PLATFORM_EXPORT @XERCES_PLATFORM_EXPORT@
 #define XERCES_PLATFORM_IMPORT @XERCES_PLATFORM_IMPORT@
+#define XERCES_TEMPLATE_EXTERN @XERCES_TEMPLATE_EXTERN@
 #ifdef XERCES_DLL_EXPORT
 #  define DLL_EXPORT
 #endif
@@ -90,7 +92,7 @@
 // ---------------------------------------------------------------------------
 //  Include standard headers, if available, that we may rely on below.
 // ---------------------------------------------------------------------------
-#if defined(__cplusplus) && defined(HAVE_CSTDINT)
+#if defined(__cplusplus) && defined(XERCES_HAVE_CSTDINT)
 #  include <cstdint>
 #endif
 #if XERCES_HAVE_STDINT_H

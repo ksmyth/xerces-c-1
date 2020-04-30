@@ -21,11 +21,23 @@
 <s1 title="Build Instructions">
   <s2 title="Build Instructions">
 
+    <p>Much of this documentation is historical in nature. The only
+    officially supported platforms with committed testing and maintenance
+    at this time are Windows (native, NOT Cygwin or other variants), 
+    Linux, and MacOS. All other builds are unsupported and untested
+    and should be expected to require patching and build debugging.
+    Patches are accepted for other platforms, as are maintainers
+    interested in taking over responsibility for supporting them.</p>
+
+    <p>While the CMake support is portable, officially the autoconf
+    support is intended to be used for Linux and MacOS and CMake used
+    for Windows.</p>
+
     <p>Build instructions are provided for the following platforms and
        compilers:</p>
 
     <ul>
-       <li><link anchor="CMake">All platforms</link></li>
+       <li><link anchor="CMake">All</link></li>
        <li><link anchor="UNIX">UNIX/Linux/Mac OS X/Cygwin/MinGW</link></li>
     </ul>
 
@@ -146,10 +158,63 @@
           </tr>
         </table>
 
+        <p>XMLCh type (UTF-16 character type):</p>
+
+        <table>
+            <tr>
+                <th>Option</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>-Dxmlch-type=char16_t</code></td>
+                <td>use <code>char16_t</code> (requires a C++11 compiler)</td>
+            </tr>
+            <tr>
+                <td><code>-Dxmlch-type=uint16_t</code></td>
+                <td>use <code>uint16_t</code> from
+                    <code>&lt;cstdint&gt;</code> or
+                    <code>&lt;stdint.h&gt;</code>, or another unsigned
+                    16-bit type such as <code>unsigned short</code> if
+                    the standard types are unavailable</td>
+            </tr>
+            <tr>
+                <td><code>-Dxmlch-type=wchar_t</code></td>
+                <td>use <code>wchar_t</code> (Windows only)</td>
+            </tr>
+        </table>
+
+        <p>MFC debug support is enabled by default (Windows only) and
+           can be disabled with the
+           <code>-Dmfc-debug:BOOL=OFF</code> option.</p>
+
         <p>Thread support is enabled by default and can be disabled
            with the <code>-Dthreads:BOOL=OFF</code> option.  If disabled,
            it will not be possible to select a mutex manager other than
-           <code>nothreads</code>.</p>
+           <code>nothreads</code>.  If enabled, one of the following
+           mutex managers may be selected:</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>-Dmutex-manager=standard</code></td>
+            <td>Use Standard C++ mutex (requires a C++11 compiler)</td>
+          </tr>
+          <tr>
+            <td><code>-Dmutex-manager=posix</code></td>
+            <td>Use POSIX threads (pthreads)  mutex (only on UNIX and Cygwin)</td>
+          </tr>
+          <tr>
+            <td><code>-Dmutex-manager=windows</code></td>
+            <td>Use Windows threads mutex (Windows and MinGW only)</td>
+          </tr>
+          <tr>
+            <td><code>-Dmutex-manager=nothreads</code></td>
+            <td>Use dummy implementation (default if threading is disabled)</td>
+          </tr>
+        </table>
 
         <p>Shared libraries are built by default. You can use the
            <code>-DBUILD_SHARED_LIBS:BOOL=OFF</code> option to build
@@ -379,8 +444,59 @@
           </tr>
         </table>
 
+        <p>XMLCh type (UTF-16 character type):</p>
+
+        <table>
+            <tr>
+                <th>Option</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>--enable-xmlch-char16_t</code></td>
+                <td>use <code>char16_t</code> (requires a C++11 compiler)</td>
+            </tr>
+            <tr>
+                <td><code>--enable-xmlch-uint16_t</code></td>
+                <td>use <code>uint16_t</code> from
+                    <code>&lt;cstdint&gt;</code> or
+                    <code>&lt;stdint.h&gt;</code>, or another unsigned
+                    16-bit type such as <code>unsigned short</code> if
+                    the standard types are unavailable</td>
+            </tr>
+            <tr>
+                <td><code>--enable-xmlch-wchar_t</code></td>
+                <td>use <code>wchar_t</code> (Windows only)</td>
+            </tr>
+        </table>
+
         <p>Thread support is enabled by default and can be disabled with the
-           <code>--disable-threads</code> option.</p>
+           <code>--disable-threads</code> option.  If disabled,
+           it will not be possible to select a mutex manager other than
+           <code>nothreads</code>.  If enabled, one of the following
+           mutex managers may be selected:</p>
+
+        <table>
+          <tr>
+            <th>Option</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td><code>--enable-mutexmgr-standard</code></td>
+            <td>Use Standard C++ mutex (requires a C++11 compiler)</td>
+          </tr>
+          <tr>
+            <td><code>--enable-mutexmgr-posix</code></td>
+            <td>Use POSIX threads (pthreads)  mutex (only on UNIX and Cygwin)</td>
+          </tr>
+          <tr>
+            <td><code>--enable-mutexmgr-windows</code></td>
+            <td>Use Windows threads mutex (Windows and MinGW only)</td>
+          </tr>
+          <tr>
+            <td><code>--enable-mutexmgr-nothreads</code></td>
+            <td>Use dummy implementation (default if threading is disabled)</td>
+          </tr>
+        </table>
 
         <p>By default <code>configure</code> selects both shared and static
            libraries. You can use the <code>--disable-shared</code> and
@@ -456,14 +572,16 @@
           <td>AIX PowerPC</td>
           <td>IBM XL C++</td>
           <td><code>./configure CXX=xlC_r CC=xlc_r</code><br/>
-              <code>gmake libxerces_c_la_LDFLAGS=-qmkshrobj</code></td>
+              <code>gmake libxerces_c_la_LDFLAGS=-qmkshrobj</code><br/>
+              (for xlC v11-v13, libxerces_c_la_LDFLAGS is not needed, but CXXFLAGS=-rtti is needed otherwise RTTI is disabled by default)</td>
         </tr>
         <tr>
           <td>AIX PowerPC-64</td>
           <td>IBM XL C++</td>
           <td><code>export OBJECT_MODE=64</code><br/>
               <code>./configure CXX=xlC_r CC=xlc_r CXXFLAGS=-q64 CFLAGS=-q64</code><br/>
-              <code>gmake libxerces_c_la_LDFLAGS=-qmkshrobj</code></td>
+              <code>gmake libxerces_c_la_LDFLAGS=-qmkshrobj</code><br/>
+              (for xlC v11-v13, libxerces_c_la_LDFLAGS is not needed, but CXXFLAGS="-q64 -rtti" is needed otherwise RTTI is disabled by default)</td>
         </tr>
         <tr>
           <td>HP-UX IA-64-32</td>

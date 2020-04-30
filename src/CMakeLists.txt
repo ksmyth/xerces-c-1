@@ -25,9 +25,8 @@ set(EXTRA_DIST
   xercesc/NLS
   xercesc/util/Xerces_autoconf_config.hpp.cmake.in
   xercesc/util/Xerces_autoconf_config.hpp.in
-  xercesc/util/Xerces_autoconf_config.msvc.hpp
-  xercesc/util/Xerces_autoconf_config.borland.hpp
-  xercesc/util/MsgLoaders/Win32
+  xercesc/util/XercesVersion.hpp.cmake.in
+  xercesc/util/XercesVersion.hpp.in
   xercesc/util/MsgLoaders/ICU/resources
 )
 
@@ -554,7 +553,6 @@ set(util_headers
   xercesc/util/ValueVectorOf.hpp
   xercesc/util/ValueVectorOf.c
   xercesc/util/XercesDefs.hpp
-  xercesc/util/XercesVersion.hpp
   xercesc/util/XMemory.hpp
   xercesc/util/XML256TableTranscoder.hpp
   xercesc/util/XML88591Transcoder.hpp
@@ -605,6 +603,7 @@ set(util_sources
   xercesc/util/EncodingValidator.cpp
   xercesc/util/HeaderDummy.cpp
   xercesc/util/HexBin.cpp
+  xercesc/util/JanitorExports.cpp
   xercesc/util/KVStringPair.cpp
   xercesc/util/Mutexes.cpp
   xercesc/util/PanicHandler.cpp
@@ -1010,6 +1009,14 @@ set(nothreadmmgr_sources
   xercesc/util/MutexManagers/NoThreadMutexMgr.cpp
 )
 
+set(stdmmgr_headers
+  xercesc/util/MutexManagers/StdMutexMgr.hpp
+)
+
+set(stdmmgr_sources
+  xercesc/util/MutexManagers/StdMutexMgr.cpp
+)
+
 set(posixmmgr_headers
   xercesc/util/MutexManagers/PosixMutexMgr.hpp
 )
@@ -1079,7 +1086,6 @@ if(XERCES_USE_NETACCESSOR_CURL)
   list(APPEND libxerces_c_SOURCES ${curl_sources})
   list(APPEND libxerces_c_HEADERS ${curl_headers})
   list(APPEND libxerces_c_DEPS ${CURL_LIBRARIES})
-  include_directories(${CURL_INCLUDE_DIRS})
 endif()
 
 if(XERCES_USE_NETACCESSOR_SOCKET)
@@ -1142,7 +1148,7 @@ if(XERCES_USE_MSGLOADER_ICU)
   list(APPEND libxerces_c_DEPS ICU::uc ICU::data)
 
   # Resource shortname
-  set(PKGNAME xercesc_messages_${LIB_INTERFACE_VER_U})
+  set(PKGNAME xercesc_messages_${INTERFACE_VERSION_U})
 
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/xercesc_messages.c"
@@ -1203,6 +1209,12 @@ if(XERCES_USE_MUTEXMGR_NOTHREAD)
   list(APPEND libxerces_c_HEADERS ${nothreadmmgr_headers})
 endif()
 
+if(XERCES_USE_MUTEXMGR_STD)
+  list(APPEND libxerces_c_SOURCES ${stdmmgr_sources})
+  list(APPEND libxerces_c_HEADERS ${stdmmgr_headers})
+  list(APPEND libxerces_c_DEPS Threads::Threads)
+endif()
+
 if(XERCES_USE_MUTEXMGR_POSIX)
   list(APPEND libxerces_c_SOURCES ${posixmmgr_sources})
   list(APPEND libxerces_c_HEADERS ${posixmmgr_headers})
@@ -1231,10 +1243,10 @@ endif()
 # might be possible to use with Cygwin and MinGW.
 if(MSVC)
   configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/xercesc/util/MsgLoaders/Win32/Version.rc.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/MsgLoaders/Win32/Version.rc"
+    "${CMAKE_CURRENT_SOURCE_DIR}/xercesc/util/version.rc.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/version.rc"
     @ONLY)
-  list(APPEND libxerces_c_RESOURCES "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/MsgLoaders/Win32/Version.rc")
+  list(APPEND libxerces_c_RESOURCES "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/version.rc")
 endif()
 
 # Definitions required for building
@@ -1249,6 +1261,9 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
+#if(XERCES_USE_NETACCESSOR_CURL)
+#  include_directories(SYSTEM ${CURL_INCLUDE_DIRS})
+#endif()
 
 add_custom_target(xerces-c-headers SOURCES ${libxerces_c_HEADERS})
 set_target_properties(xerces-c-headers PROPERTIES FOLDER "Library")
@@ -1257,34 +1272,40 @@ add_library(xerces-c
   ${libxerces_c_SOURCES}
   ${libxerces_c_RESOURCES})
 target_link_libraries(xerces-c ${libxerces_c_DEPS})
+if(XERCES_USE_NETACCESSOR_CURL)
+  target_include_directories(xerces-c SYSTEM PRIVATE ${CURL_INCLUDE_DIRS})
+endif()
+
 if(MSVC)
   # Add configuration-specific library name to resource file.
   target_compile_definitions(xerces-c PRIVATE "XERCES_DLL_NAME=\"$<TARGET_FILE_NAME:xerces-c>\\0\"")
   # Different naming for Windows than for Unix builds for backward
   # compatibility with the existing project files.
-  set_target_properties(xerces-c PROPERTIES OUTPUT_NAME "xerces-c_${LIB_INTERFACE_VER_U_MAJOR}")
-  set_target_properties(xerces-c PROPERTIES RUNTIME_OUTPUT_NAME "xerces-c_${LIB_INTERFACE_VER_U}")
+  set_target_properties(xerces-c PROPERTIES OUTPUT_NAME "xerces-c_${INTERFACE_VERSION_MAJOR}")
+  set_target_properties(xerces-c PROPERTIES RUNTIME_OUTPUT_NAME "xerces-c_${INTERFACE_VERSION_U}")
   set_target_properties(xerces-c PROPERTIES DEBUG_POSTFIX "D")
 elseif(UNIX)
   # For strict libtool compatibility on Unix.  It's a horrible hack to
   # set the version in the filename, and create the symlink at install
   # time.  Note: could be dropped when the SONAME is updated and
   # libtool compatibility is no longer required.
-  set_target_properties(xerces-c PROPERTIES OUTPUT_NAME "xerces-c-${LIB_INTERFACE_VER_D}")
-  file(GENERATE
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/InstallLibrarySymlink.cmake"
-    CONTENT "execute_process(COMMAND ln -sf \"$<TARGET_FILE_NAME:xerces-c>\" \"\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_LIBDIR}/libxerces-c.so\")")
-  install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/InstallLibrarySymlink.cmake")
+  if(BUILD_SHARED_LIBS)
+    set_target_properties(xerces-c PROPERTIES OUTPUT_NAME "xerces-c-${INTERFACE_VERSION_D}")
+    file(GENERATE
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/InstallLibrarySymlink.cmake"
+      CONTENT "execute_process(COMMAND ln -sf \"$<TARGET_FILE_NAME:xerces-c>\" \"\$ENV{DESTDIR}${CMAKE_INSTALL_FULL_LIBDIR}/libxerces-c${CMAKE_SHARED_LIBRARY_SUFFIX}\")")
+    install(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/InstallLibrarySymlink.cmake")
+  endif()
 else()
   # Not used for the common cases, though this would be the default if
   # not for libtool compatibility.
-  set_target_properties(xerces-c PROPERTIES SOVERSION ${LIB_INTERFACE_VER_D})
+  set_target_properties(xerces-c PROPERTIES SOVERSION ${INTERFACE_VERSION_D})
   if(NOT CYGWIN)
     # This property causes shared libraries on Linux to have the full
     # version encoded into their final filename.  We disable this on
     # Cygwin because it causes xerces-c-${XERCES_C_FULL_VERSION}.dll
     # to be created when xerces-c.dll seems to be the default.
-    set_target_properties(xerces-c PROPERTIES VERSION ${LIB_INTERFACE_VER_D})
+    set_target_properties(xerces-c PROPERTIES VERSION ${INTERFACE_VERSION_D})
   endif()
 endif()
 set_target_properties(xerces-c PROPERTIES FOLDER "Library")
@@ -1350,9 +1371,10 @@ endif()
 unset(group_dir)
 unset(group_files)
 
-# Make sure cmake-generated Xerces_autoconf_config.hpp ends up in a
-# proper place when installed.
+# Make sure cmake-generated Xerces_autoconf_config.hpp and
+# XercesVersion.hpp end up in a proper place when installed.
 install(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/Xerces_autoconf_config.hpp"
+        "${CMAKE_CURRENT_BINARY_DIR}/xercesc/util/XercesVersion.hpp"
   DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/xercesc/util"
   COMPONENT "development")
