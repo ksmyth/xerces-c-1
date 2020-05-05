@@ -24,6 +24,7 @@ build_script:
   - '"c:\Program Files\7-Zip\7z.exe"  x -ox64 xerces-x64.zip'
 
   - ps: 'Import-Module CoApp; Write-NuGetPackage .\xerces-c-static.autopkg'
+  - 'sha1sum *.nupkg'
 
 artifacts:
   - path: '*.nupkg'
